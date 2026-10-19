@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = "https://jute-product-website.onrender.com/api/products";
 
 export const getProducts = async () => {
   
