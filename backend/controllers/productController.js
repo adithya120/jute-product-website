@@ -72,31 +72,90 @@ export const getProducts = async (req, res) => {
   }
 };
 
+// export const getProductById = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const result = await pool.query(
+//       "SELECT * FROM products WHERE id = $1",
+//       [id]
+//     );
+
+//     if (result.rows.length === 0) {
+//       return res.status(404).json({
+//         message: "Product not found"
+//       });
+//     }
+
+//     res.status(200).json(result.rows[0]);
+//   } catch (error) {
+//     console.error(error);
+
+//     res.status(500).json({
+//       message: "Failed to fetch product"
+//     });
+//   }
+// };
+
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
-      "SELECT * FROM products WHERE id = $1",
+    // 1. Fetch product and category
+    const productResult = await pool.query(
+      `SELECT
+         p.*,
+         c.name AS category_name
+       FROM products p
+       LEFT JOIN categories c
+         ON p.category_id = c.id
+       WHERE p.id = $1`,
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (productResult.rows.length === 0) {
       return res.status(404).json({
-        message: "Product not found"
+        success: false,
+        message: "Product not found",
       });
     }
 
-    res.status(200).json(result.rows[0]);
+    // 2. Fetch all variants of this product
+    const variantsResult = await pool.query(
+      `SELECT *
+       FROM product_variants
+       WHERE product_id = $1
+       ORDER BY id ASC`,
+      [id]
+    );
+
+    // 3. Fetch all images of this product
+    const imagesResult = await pool.query(
+      `SELECT *
+       FROM product_images
+       WHERE product_id = $1
+       ORDER BY is_primary DESC, id ASC`,
+      [id]
+    );
+
+    // 4. Combine the results
+    res.status(200).json({
+      success: true,
+      product: {
+        ...productResult.rows[0],
+        variants: variantsResult.rows,
+        images: imagesResult.rows,
+      },
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Get product by ID error:", error);
 
     res.status(500).json({
-      message: "Failed to fetch product"
+      success: false,
+      message: "Failed to fetch product",
     });
   }
 };
-
 export const createProduct = async (req, res) => {
   try {
     const {
