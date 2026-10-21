@@ -8,6 +8,8 @@ import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js"
 import checkoutRoutes from "./routes/checkoutRoutes.js"
+import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -29,6 +31,8 @@ app.use("/api/auth", userRoutes);
 app.use("/api/cart", cartRoutes); 
 app.use("/api/products", productImageRoutes);  
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 // app.get("/test-db", async (req, res) => {
